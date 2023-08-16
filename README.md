@@ -97,7 +97,7 @@ not much for now
 - [x] impleetn grav force or electric force
 - [ ] add fun buttons and controls
 - [ ] fluidify the whole thing
-- [ ] collisions
+- [X] collisions
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
