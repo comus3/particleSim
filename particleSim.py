@@ -17,14 +17,8 @@ gravitationalMode = True
 colliderSubSteps = 6
 xLength = 1000
 yLength = 900
-gridSpacingX = xLength/radius
-gridSpacingY = yLength/radius
-circlePos = [0,-1,1,-9,9,10,-10,8,-8]
-topPos = [0,-1,1,9,8,10]
-botPos = [0,-1,1,-9,-8,-10]
-leftPos = [0,1,9,10,-9,-8]
-rightPos = [0,-1,9,-9,8,-10]
-
+gridSpacingX = int(xLength/radius)
+gridSpacingY = int(yLength/radius)
 #clase particules
 #rqjouter regex pr check init
 class particle:
@@ -76,20 +70,20 @@ def scaling(vector,scalar):
     return (vector[0]*scalar,vector[1]*scalar)
 
 def organise():
-    grid =[]
-    for i in range(90):
-        grid.append([])
+    grid ={}
+    for i in range(gridSpacingX):
+        for j in range(gridSpacingY):
+            grid[(i,j)] = []
     for particule in particleList:
-        for n in range(10):
-            if 100*n<=particule.pos[0]<100*(n+1):
-                xIndex = n
+        for m in range(gridSpacingX):
+            if m*radius<=particule.pos[0]<radius*(m+1):
+                xIndex = m
                 break
-        for m in range(9):
-            if 100*m<=particule.pos[1]<100*(m+1):
-                yIndex = m
+        for n in range(9):
+            if radius*n<=particule.pos[1]<radius*(n+1):
+                yIndex = n
                 break
-        j,k = str(n),str(m)
-        grid[int(k+j)].append(particle)
+        grid[(m,n)].append(particule)
     return grid
 
 def checkCollision(objectA,objectB):
@@ -100,8 +94,8 @@ def checkCollision(objectA,objectB):
         colVector = normalise((distx,disty))
         correctionDist = (dist-(objectA.radius+objectB.radius))/2
         correctionVect = scaling(colVector,correctionDist)
-        objectA.move((objectA[0]-correctionVect[0],objectA[1]-correctionVect[1]))
-        objectB.move((objectB[0]+correctionVect[0],objectB[1]+correctionVect[1]))
+        objectA.move((objectA.pos[0]-correctionVect[0],objectA.pos[1]-correctionVect[1]))
+        objectB.move((objectB.pos[0]+correctionVect[0],objectB.pos[1]+correctionVect[1]))
 
 def collider():
     def check(indexes):
@@ -113,26 +107,25 @@ def collider():
                             checkCollision(particle,other)
     grid = organise()
     for steps in range(colliderSubSteps):
-        for i in range(90):
-            if grid[i] != []:
-                if 0<i<9:
-                    check(topPos)
-                elif i%9==0:
-                    check(rightPos)
-                elif i%10 == 0:
-                    check(leftPos)
-                elif 81<i<89:
-                    check(botPos)
-                elif i == 0:
-                    check([0,1,9])
-                elif i == 8:
-                    check([0,-1,9])
-                elif i == 81:
-                    check([0,1,-9])
-                elif i == 89:
-                    check([0,-1,-9])
-                else:
-                    check(circlePos)
+        for i in range(gridSpacingX):
+            if i == 0 or i == gridSpacingX-1:
+                continue
+            for j in range(gridSpacingY):
+                if j == 0 or j == gridSpacingY:
+                    continue
+                if grid[(i,j)] != []:
+                    for particle in grid[(i,j)]:
+                        for other in grid[(i,j)]:
+                            if other!=particle:
+                                checkCollision(particle,other)
+                        gridCircle = [(i+1,j),(i-1,j),(i,j+1),(i,j-1),(i-1,j-1),(i+1,j-1),(i+1,j+1),(i-1,j+1)]
+                        for index in gridCircle:
+                            for other in grid[(index)]:
+                                checkCollision(particle,other)
+                        
+
+
+        
 
                 
 
@@ -219,7 +212,7 @@ while True:
             sys.exit()
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == particleAdd:
-                particle((300,200),0,(3,0))
+                particle((300,200),70,(3,0))
         if event.type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
             if event.ui_element == sliderCharge:
                 statParticle.setCharge(event.value)
