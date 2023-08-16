@@ -79,14 +79,14 @@ def gravityEffect():
                 
 def constraintEffect():
     for particle in particleList:
-        if particle.pos[0]-radius > 1000:
-            particle.move((1000,particle.pos[1]))
-        elif particle.pos[0]+radius < 0:
-            particle.move((0,particle.pos[1]))
-        elif particle.pos[1]-radius > 900:
-            particle.move((particle.pos[0],900))
-        elif particle.pos[1]+radius < 0:
-            particle.move((particle.pos[0],0))
+        if particle.pos[0]+radius > 1000:
+            particle.move((1000-radius,particle.pos[1]))
+        elif particle.pos[0]-radius < 0:
+            particle.move((0+radius,particle.pos[1]))
+        elif particle.pos[1]+radius > 900:
+            particle.move((particle.pos[0],900-radius))
+        elif particle.pos[1]-radius < 0:
+            particle.move((particle.pos[0],0+radius))
 
                     
 
@@ -124,8 +124,10 @@ displayOfRot = UILabel(
 	    manager=manager
     )
 
-for i in range(10):
-    particule = particle((300+2*i,300-i),7,(0,0))
+for i in range(5):
+    particule = particle((300+2*i,300-i),70,(0,0))
+for i in range(5):
+    particule = particle((400+2*i,300-i),-70,(0,0))
 #run
 while True:
     time_delta = clock.tick(frames)
