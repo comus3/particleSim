@@ -9,17 +9,19 @@ import sys
 import math
 pygame.init()
 
+simSubsteps = 2
 radius = 25
 frames = 30
 dt = 1/frames
-gravity = (0,981)
+timeStep = dt/simSubsteps
+gravity = (0,98.1)
 particleList = []
 gravitationalMode = True
 colliderSubSteps = 8
 xLength = 1000
 yLength = 900
-gridSpacingX = int(xLength/(radius*4))
-gridSpacingY = int(yLength/(radius*3))
+gridSpacingX = int(xLength/(radius*2))
+gridSpacingY = int(yLength/(radius*2))
 global nmbreParticules,displayOfRot
 
 #clase particules
@@ -46,7 +48,7 @@ class particle:
         self.accVector = addition(self.accVector,vector)
     def propCacheReturn(self):
         return self.accVector
-    def updatePosition(self):
+    def updatePosition(self,dt):
         if not(self.static):
             self.speedVector = substraction(self.pos,self.lastPos)
             self.lastPos = self.pos
@@ -83,21 +85,35 @@ def addition(vector1,vector2):
 def scaling(vector,scalar):
     return (vector[0]*scalar,vector[1]*scalar)
 
+# def organise():
+#     grid ={}
+#     for i in range(gridSpacingX):
+#         for j in range(gridSpacingY):
+#             grid[(i,j)] = []
+#     for particule in particleList:
+#         for m in range(gridSpacingX):
+#             if m*radius<=particule.pos[0]<radius*(m+1):
+#                 xIndex = m
+#                 break
+#         for n in range(9):
+#             if radius*n<=particule.pos[1]<radius*(n+1):
+#                 yIndex = n
+#                 break
+#         grid[(m,n)].append(particule)
+#     return grid
 def organise():
-    grid ={}
+    grid = {}
     for i in range(gridSpacingX):
         for j in range(gridSpacingY):
-            grid[(i,j)] = []
-    for particule in particleList:
-        for m in range(gridSpacingX):
-            if m*radius<=particule.pos[0]<radius*(m+1):
-                xIndex = m
-                break
-        for n in range(9):
-            if radius*n<=particule.pos[1]<radius*(n+1):
-                yIndex = n
-                break
-        grid[(m,n)].append(particule)
+            grid[(i, j)] = []
+    
+    for particle in particleList:
+        xIndex = int(particle.pos[0] // (radius * 2))
+        yIndex = int(particle.pos[1] // (radius * 2))
+        xIndex = min(max(xIndex, 0), gridSpacingX - 1)
+        yIndex = min(max(yIndex, 0), gridSpacingY - 1)
+        grid[(xIndex, yIndex)].append(particle)
+    
     return grid
 
 def checkCollision(objectA,objectB):
@@ -112,8 +128,7 @@ def checkCollision(objectA,objectB):
         objectB.move((objectB.pos[0]-correctionVect[0],objectB.pos[1]-correctionVect[1]))
 
 def collider():
-    
-    for steps in range(colliderSubSteps):
+    for lurkin in range(colliderSubSteps):
         grid = organise()
         for i in range(gridSpacingX):
             if i == 0 or i == gridSpacingX-1:
@@ -126,10 +141,11 @@ def collider():
                         for other in grid[(i,j)]:
                             if other!=particle:
                                 checkCollision(particle,other)
-                        gridCircle = [(i+1,j),(i-1,j),(i,j+1),(i,j-1),(i-1,j-1),(i+1,j-1),(i+1,j+1),(i-1,j+1)]
+                        gridCircle = [(i+x, j+y) for x in [-1, 0, 1] for y in [-1, 0, 1]]
                         for index in gridCircle:
-                            for other in grid[(index)]:
-                                checkCollision(particle,other)
+                            if index in grid:
+                                for other in grid[index]:
+                                    checkCollision(particle,other)
                         
         
 def forceEffect():
@@ -171,6 +187,7 @@ def constraintEffect():
 
 #init
 screen = pygame.display.set_mode((xLength,yLength))
+clock = pygame.time.Clock()
 manager = pygame_gui.UIManager((xLength, yLength))
 
 ####### #     BOUTONS
@@ -184,7 +201,7 @@ particleAdd = UIButton(
 ######### SLIDERS
 sliderCharge = UIHorizontalSlider(
     pygame.Rect((750,
-    30),(240, 25)), 400, (2, 13000),
+    30),(240, 25)), 400, (2, 130000),
     manager = manager
 )
 
@@ -200,7 +217,7 @@ statParticle = particle((400,450),400,(0,0),True,(30,0,210),25)
 #run
 
 while True:
-    time_delta = dt
+    time_delta = clock.tick(frames)
     ######################    partie bouttons(réactions)
 
     for event in pygame.event.get():
@@ -208,7 +225,7 @@ while True:
             sys.exit()
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == particleAdd:
-                particle((400,200),70,(10,0))
+                particle((400,200),7,(1,0))
         if event.type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
             if event.ui_element == sliderCharge:
                 statParticle.setCharge(event.value)
@@ -217,11 +234,12 @@ while True:
 
        ######################    partie dessins et update des vars
     forceEffect()
-    #gravityEffect()
+    gravityEffect()
     constraintEffect()
-    for particule in particleList:
-        particule.updatePosition()
-    collider()
+    for gazou in range(simSubsteps):
+        collider()
+        for particule in particleList:
+            particule.updatePosition(timeStep)
     
     #bck grnd
     pygame.draw.rect(screen, (125, 123, 15), pygame.Rect(0, 0, xLength, yLength))
@@ -236,23 +254,3 @@ while True:
     ###############################  affichage 
     manager.draw_ui(screen)
     pygame.display.flip()
-    
-
-#0,1, 2, 3, 4, 5, 6, 7, 8
-#9,10,11,12,13,14,15,16,17
-#18,19,20,21,22,23,24,25,26
-#27,28,29,30,31,32,33,34,35
-#36,37,38,39,40,41,42,43,44
-#45,46,47,48,49,50,51,52,53
-#54,55,56,57,58,59,60,61,62
-#63,64,65,66,67,68,69,70,71
-#72,73,74,75,76,77,78,79,80
-#81,82,83,84,85,86,87,88,89
-# 
-# #
-#
-#
-#
-#
-#
-#
