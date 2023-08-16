@@ -7,7 +7,9 @@ from pygame_gui.elements import UIButton, UITextEntryLine, UILabel, UIHorizontal
 import sys
 import math
 pygame.init()
-
+frames = 60
+dt = 1/frames
+gravity = (0,-9.81)
 particleList = []
 
 
@@ -15,17 +17,16 @@ particleList = []
 #rqjouter regex pr check init
 radius = 2
 class particle:
-    def __init__(self,initPos,charge,initSpeed):
-        self.initPos[0] = initPos[0]
-        self.initPos[1] = initPos[1]
+    def __init__(self,initPos,charge,initSpeed,color):
+        self.initPos = initPos
+        self.lastPos = initPos - initSpeed
         self.charge = charge
-        self.radius = 2
-        self.pos[0] = initPos[0]
-        self.pos[1] = initPos[1]
-        self.speedVector = initSpeed
+        self.radius = radius
+        self.pos = initPos
         self.initSpeed = initSpeed
-        self.forceVector = (0,0)
+        self.accVector = (0,0)
         particleList.append(self)
+        self.color = color
     def returnPos(self):
         return (self.initPosX,self.initPosY)
     def returnCharge(self):
@@ -34,9 +35,16 @@ class particle:
         self.pos[0] = newPos[0]
         self.pos[1] = newPos[1]
     def propCacheAdd(self,vector):
-        self.forceVector = (self.forceVector[0]+vector[0],self.forceVector[1]+vector[1])
+        self.accVector = (self.accVector[0]+vector[0],self.accVector[1]+vector[1])
     def propCacheReturn(self):
-        return self.forceVector
+        return self.accVector
+    def updatePosition(self):
+        self.speedVector = self.pos - self.lastPos
+        self.lastPos = self.pos
+        self.pos = self.pos + self.speedVector + self.accVector*dt*dt
+        self.accVector = (0,0)
+        
+
 
 #fonctions
 def normalise(vector):
@@ -46,18 +54,7 @@ def normalise(vector):
 
 
 def collider():
-    cacheList = particleList
-    for particle in cacheList:
-        cacheList.pop(particle)
-        for other in cacheList:
-            distx = (other.pos[0]-particle.pos[0])
-            disty = (other.pos[1]-particle.pos[1])
-            dist = math.sqrt((distx**2)+(disty**2))
-            if dist < radius**2:
-                propvector = normalise((distx,disty))
-                propvector = ((10*propvector[0])/dist,(10*propvector[1])/dist)
-                other.propCacheAdd(propvector)
-                particle.propCacheAdd((-propvector[0],-propvector[1]))
+    return 0
         
 def forceEffect():
     cacheList = particleList
@@ -68,14 +65,15 @@ def forceEffect():
             disty = (other.pos[1]-particle.pos[1])
             dist = math.sqrt((distx**2)+(disty**2))
             propVector = normalise((distx,disty))
-            propVector = (other.returnCharge()*particle.returnCharge()*propVector[0],other.returnCharge()*particle.returnCharge()*propVector[1])
+            propVector = (other.returnCharge()*particle.returnCharge()*propVector[0]/(dist**2),other.returnCharge()*particle.returnCharge()*propVector[1]/(dist**2))
             particle.propCacheAdd(propVector)
             other.propCacheAdd((-propVector[0],-propVector[1]))
-            
 
-def mover():
-    return 0
-                    
+def gravityEffect():
+    cacheList = particleList
+    for particle in cacheList:
+        particle.propCacheAdd(gravity)
+                
                     
 
                     
@@ -117,7 +115,7 @@ displayOfRot = UILabel(
 
 #run
 while True:
-    time_delta = clock.tick(60)
+    time_delta = clock.tick(frames)
 
     ######################    partie bouttons(réactions)
 
