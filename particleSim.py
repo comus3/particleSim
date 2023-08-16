@@ -15,7 +15,7 @@ particleList = []
 
 #clase particules
 #rqjouter regex pr check init
-radius = 20
+radius = 5
 class particle:
     def __init__(self,initPos,charge,initSpeed,static=False,color = (255, 80, 80)):
         self.static = static
@@ -89,11 +89,11 @@ def constraintEffect():
     for particle in particleList:
         if particle.pos[0]+radius > 1000:
             particle.move((1000-radius,particle.pos[1]))
-        elif particle.pos[0]-radius < 0:
+        if particle.pos[0]-radius < 0:
             particle.move((0+radius,particle.pos[1]))
-        elif particle.pos[1]+radius > 900:
+        if particle.pos[1]+radius > 900:
             particle.move((particle.pos[0],900-radius))
-        elif particle.pos[1]-radius < 0:
+        if particle.pos[1]-radius < 0:
             particle.move((particle.pos[0],radius))
 
 
@@ -127,7 +127,7 @@ displayOfRot = UILabel(
 	    manager=manager
     )
 
-statParticle = particle((400,450),400,(0,0),True)
+statParticle = particle((400,450),400,(0,0),True,(30,0,210))
 #run
 while True:
     time_delta = clock.tick(frames)
