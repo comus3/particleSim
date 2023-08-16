@@ -9,7 +9,7 @@ import math
 pygame.init()
 frames = 60
 dt = 1/frames
-gravity = (0,-9.81)
+gravity = (0,9.81)
 particleList = []
 
 
@@ -17,9 +17,9 @@ particleList = []
 #rqjouter regex pr check init
 radius = 2
 class particle:
-    def __init__(self,initPos,charge,initSpeed,color):
+    def __init__(self,initPos,charge,initSpeed,color = (255, 80, 80)):
         self.initPos = initPos
-        self.lastPos = initPos - initSpeed
+        self.lastPos = substraction(initPos,initSpeed)
         self.charge = charge
         self.radius = radius
         self.pos = initPos
@@ -35,13 +35,13 @@ class particle:
         self.pos[0] = newPos[0]
         self.pos[1] = newPos[1]
     def propCacheAdd(self,vector):
-        self.accVector = (self.accVector[0]+vector[0],self.accVector[1]+vector[1])
+        self.accVector = addition(self.accVector,vector)
     def propCacheReturn(self):
         return self.accVector
     def updatePosition(self):
-        self.speedVector = self.pos - self.lastPos
+        self.speedVector = substraction(self.pos,self.lastPos)
         self.lastPos = self.pos
-        self.pos = self.pos + self.speedVector + self.accVector*dt*dt
+        self.pos = addition(addition(self.pos,self.speedVector),scaling(self.accVector,dt*dt))
         self.accVector = (0,0)
         
 
@@ -50,16 +50,21 @@ class particle:
 def normalise(vector):
     lenght = math.sqrt((vector[0]**2)+(vector[1]**2))
     return (vector[0]/lenght,vector[1]/lenght)
-
+def substraction(vector1,vector2):
+    return (vector1[0]-vector2[0],vector1[1]-vector2[1])
+def addition(vector1,vector2):
+    return (vector1[0]+vector2[0],vector1[1]+vector2[1])
+def scaling(vector,scalar):
+    return (vector[0]*scalar,vector[1]*scalar)
 
 
 def collider():
     return 0
         
 def forceEffect():
-    cacheList = particleList
+    cacheList = particleList.copy()
     for particle in cacheList:
-        cacheList.pop(particle)
+        cacheList.remove(particle)
         for other in cacheList:
             distx = (other.pos[0]-particle.pos[0])
             disty = (other.pos[1]-particle.pos[1])
@@ -70,8 +75,7 @@ def forceEffect():
             other.propCacheAdd((-propVector[0],-propVector[1]))
 
 def gravityEffect():
-    cacheList = particleList
-    for particle in cacheList:
+    for particle in particleList:
         particle.propCacheAdd(gravity)
                 
                     
@@ -112,11 +116,12 @@ displayOfRot = UILabel(
 	    manager=manager
     )
 
-
+for i in range(10):
+    particule = particle((300+2*i,300-i),7,(0,0))
 #run
 while True:
     time_delta = clock.tick(frames)
-
+    
     ######################    partie bouttons(réactions)
 
     for event in pygame.event.get():
@@ -134,11 +139,18 @@ while True:
     manager.update(time_delta/1)
 
        ######################    partie dessins et update des vars
+    forceEffect()
+    #gravityEffect()
+    for particule in particleList:
+        particule.updatePosition()
     #bck grnd
     pygame.draw.rect(screen, (125, 123, 15), pygame.Rect(0, 0, 1000, 900))
     #affichage
     ####
     #particles
+    for particule in particleList:
+        pygame.draw.circle(screen,(particule.color),particule.pos,radius)
+    
     ####
 
     ###############################  affichage 
