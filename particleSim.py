@@ -15,7 +15,7 @@ particleList = []
 
 #clase particules
 #rqjouter regex pr check init
-radius = 2
+radius = 20
 class particle:
     def __init__(self,initPos,charge,initSpeed,color = (255, 80, 80)):
         self.initPos = initPos
@@ -32,8 +32,7 @@ class particle:
     def returnCharge(self):
         return self.charge
     def move(self,newPos):
-        self.pos[0] = newPos[0]
-        self.pos[1] = newPos[1]
+        self.pos = (newPos[0],newPos[1])
     def propCacheAdd(self,vector):
         self.accVector = addition(self.accVector,vector)
     def propCacheReturn(self):
@@ -78,7 +77,16 @@ def gravityEffect():
     for particle in particleList:
         particle.propCacheAdd(gravity)
                 
-                    
+def constraintEffect():
+    for particle in particleList:
+        if particle.pos[0]-radius > 1000:
+            particle.move((1000,particle.pos[1]))
+        elif particle.pos[0]+radius < 0:
+            particle.move((0,particle.pos[1]))
+        elif particle.pos[1]-radius > 900:
+            particle.move((particle.pos[0],900))
+        elif particle.pos[1]+radius < 0:
+            particle.move((particle.pos[0],0))
 
                     
 
@@ -140,7 +148,8 @@ while True:
 
        ######################    partie dessins et update des vars
     forceEffect()
-    #gravityEffect()
+    gravityEffect()
+    constraintEffect()
     for particule in particleList:
         particule.updatePosition()
     #bck grnd
