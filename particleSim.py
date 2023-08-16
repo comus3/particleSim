@@ -11,6 +11,7 @@ frames = 60
 dt = 1/frames
 gravity = (0,981)
 particleList = []
+gravitationalMode = False
 
 
 #clase particules
@@ -76,10 +77,12 @@ def forceEffect():
             dist = math.sqrt((distx**2)+(disty**2))
             propVector = normalise((distx,disty))
             propVector = (other.returnCharge()*particle.returnCharge()*propVector[0]/(dist),other.returnCharge()*particle.returnCharge()*propVector[1]/(dist))
-            #particle.propCacheAdd(propVector)
-            #other.propCacheAdd((-propVector[0],-propVector[1]))
-            other.propCacheAdd(propVector)
-            particle.propCacheAdd((-propVector[0],-propVector[1]))
+            if gravitationalMode:
+                particle.propCacheAdd(propVector)
+                other.propCacheAdd((-propVector[0],-propVector[1]))
+            else:
+                other.propCacheAdd(propVector)
+                particle.propCacheAdd((-propVector[0],-propVector[1]))
 
 def gravityEffect():
     for particle in particleList:
@@ -114,7 +117,7 @@ particleAdd = UIButton(
 ######### SLIDERS
 sliderCharge = UIHorizontalSlider(
     pygame.Rect((750,
-    30),(240, 25)), 400, (2, 70000),
+    30),(240, 25)), 400, (2, 10000),
     manager = manager
 )
 
@@ -139,7 +142,7 @@ while True:
             sys.exit()
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == particleAdd:
-                particle((300,300),-70,(3,0))
+                particle((300,200),70,(3,0))
         if event.type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
             if event.ui_element == sliderCharge:
                 statParticle.setCharge(event.value)
