@@ -4,21 +4,24 @@ from msilib import text
 import pygame
 import pygame_gui
 from pygame_gui.elements import UIButton, UITextEntryLine, UILabel, UIHorizontalSlider
+from threading import Thread
 import sys
 import math
 pygame.init()
 
-radius = 20
-frames = 60
+radius = 25
+frames = 30
 dt = 1/frames
 gravity = (0,981)
 particleList = []
 gravitationalMode = True
-colliderSubSteps = 6
+colliderSubSteps = 8
 xLength = 1000
 yLength = 900
-gridSpacingX = int(xLength/radius)
-gridSpacingY = int(yLength/radius)
+gridSpacingX = int(xLength/(radius*4))
+gridSpacingY = int(yLength/(radius*3))
+global nmbreParticules,displayOfRot
+
 #clase particules
 #rqjouter regex pr check init
 class particle:
@@ -53,10 +56,21 @@ class particle:
             self.pos = self.lastPos
     def setCharge(self,newCharge):
         self.charge = newCharge
-        
+    def resetAcc(self):
+        self.accVector = (0,0)
 
 
 #fonctions
+
+# def refreshLabel():
+#     global nmbreParticules,displayOfRot
+#     while True:
+#         if len(particleList)!=0:
+#             nmbreParticules = len(particleList)
+#         else :nmbreParticules = 0
+#         displayOfRot.config(text = str(nmbreParticules)+" particules")
+
+
 def normalise(vector):
     if vector[0] == vector[1] == 0:
         return (0,0)
@@ -92,26 +106,20 @@ def checkCollision(objectA,objectB):
     dist = math.sqrt((distx**2)+(disty**2))
     if dist<(objectA.radius+objectB.radius):
         colVector = normalise((distx,disty))
-        correctionDist = (dist-(objectA.radius+objectB.radius))/2
+        correctionDist = (objectA.radius+objectB.radius-dist)/2
         correctionVect = scaling(colVector,correctionDist)
-        objectA.move((objectA.pos[0]-correctionVect[0],objectA.pos[1]-correctionVect[1]))
-        objectB.move((objectB.pos[0]+correctionVect[0],objectB.pos[1]+correctionVect[1]))
+        objectA.move((objectA.pos[0]+correctionVect[0],objectA.pos[1]+correctionVect[1]))
+        objectB.move((objectB.pos[0]-correctionVect[0],objectB.pos[1]-correctionVect[1]))
 
 def collider():
-    def check(indexes):
-        for particle in grid[i]:
-            for index in indexes:
-                if grid[i+index] != []:
-                    for other in grid[i+index]:
-                        if other != particle:
-                            checkCollision(particle,other)
-    grid = organise()
+    
     for steps in range(colliderSubSteps):
+        grid = organise()
         for i in range(gridSpacingX):
             if i == 0 or i == gridSpacingX-1:
                 continue
             for j in range(gridSpacingY):
-                if j == 0 or j == gridSpacingY:
+                if j == 0 or j == gridSpacingY-1:
                     continue
                 if grid[(i,j)] != []:
                     for particle in grid[(i,j)]:
@@ -123,16 +131,6 @@ def collider():
                             for other in grid[(index)]:
                                 checkCollision(particle,other)
                         
-
-
-        
-
-                
-
-
-
-
-
         
 def forceEffect():
     cacheList = particleList.copy()
@@ -173,7 +171,6 @@ def constraintEffect():
 
 #init
 screen = pygame.display.set_mode((xLength,yLength))
-clock = pygame.time.Clock()
 manager = pygame_gui.UIManager((xLength, yLength))
 
 ####### #     BOUTONS
@@ -192,19 +189,18 @@ sliderCharge = UIHorizontalSlider(
 )
 
 ########## infos
+# displayOfRot = UILabel(
+# 	    relative_rect=pygame.Rect(750, 620, 250, 100),
+# 	    text="0 particules",
+# 	    manager=manager
+#     )
+# Thread(target=refreshLabel).start()
 
-
-displayOfRot = UILabel(
-	    relative_rect=pygame.Rect(750, 620, 250, 100),
-	    text=str("Couleurs"),
-	    manager=manager
-    )
-
-statParticle = particle((400,450),400,(0,0),True,(30,0,210),20)
+statParticle = particle((400,450),400,(0,0),True,(30,0,210),25)
 #run
+
 while True:
-    time_delta = clock.tick(frames)
-    
+    time_delta = dt
     ######################    partie bouttons(réactions)
 
     for event in pygame.event.get():
@@ -212,7 +208,7 @@ while True:
             sys.exit()
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == particleAdd:
-                particle((300,200),70,(3,0))
+                particle((400,200),70,(10,0))
         if event.type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
             if event.ui_element == sliderCharge:
                 statParticle.setCharge(event.value)
@@ -221,11 +217,12 @@ while True:
 
        ######################    partie dessins et update des vars
     forceEffect()
-    gravityEffect()
+    #gravityEffect()
     constraintEffect()
     for particule in particleList:
         particule.updatePosition()
     collider()
+    
     #bck grnd
     pygame.draw.rect(screen, (125, 123, 15), pygame.Rect(0, 0, xLength, yLength))
     #affichage
