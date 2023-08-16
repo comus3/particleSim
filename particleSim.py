@@ -11,19 +11,19 @@ frames = 60
 dt = 1/frames
 gravity = (0,981)
 particleList = []
-gravitationalMode = False
+gravitationalMode = True
 
 
 #clase particules
 #rqjouter regex pr check init
 radius = 5
 class particle:
-    def __init__(self,initPos,charge,initSpeed,static=False,color = (255, 80, 80)):
+    def __init__(self,initPos,charge,initSpeed,static=False,color = (255, 80, 80),radiusOwn = radius):
         self.static = static
         self.initPos = initPos
         self.lastPos = substraction(initPos,initSpeed)
         self.charge = charge
-        self.radius = radius
+        self.radius = radiusOwn
         self.pos = initPos
         self.initSpeed = initSpeed
         self.accVector = (0,0)
@@ -63,6 +63,12 @@ def addition(vector1,vector2):
 def scaling(vector,scalar):
     return (vector[0]*scalar,vector[1]*scalar)
 
+def organise():
+    grid =[]
+    for i in range(90):
+        grid.append([])
+    for particule in particleList:
+        return 0
 
 def collider():
     return 0
@@ -90,14 +96,14 @@ def gravityEffect():
                 
 def constraintEffect():
     for particle in particleList:
-        if particle.pos[0]+radius > 1000:
-            particle.move((1000-radius,particle.pos[1]))
-        if particle.pos[0]-radius < 0:
-            particle.move((0+radius,particle.pos[1]))
-        if particle.pos[1]+radius > 900:
-            particle.move((particle.pos[0],900-radius))
-        if particle.pos[1]-radius < 0:
-            particle.move((particle.pos[0],radius))
+        if particle.pos[0]+particle.radius > 1000:
+            particle.move((1000-particle.radius,particle.pos[1]))
+        if particle.pos[0]-particle.radius < 0:
+            particle.move((0+particle.radius,particle.pos[1]))
+        if particle.pos[1]+particle.radius > 900:
+            particle.move((particle.pos[0],900-particle.radius))
+        if particle.pos[1]-particle.radius < 0:
+            particle.move((particle.pos[0],particle.radius))
 
 
 
@@ -130,7 +136,7 @@ displayOfRot = UILabel(
 	    manager=manager
     )
 
-statParticle = particle((400,450),400,(0,0),True,(30,0,210))
+statParticle = particle((400,450),400,(0,0),True,(30,0,210),20)
 #run
 while True:
     time_delta = clock.tick(frames)
@@ -161,7 +167,7 @@ while True:
     ####
     #particles
     for particule in particleList:
-        pygame.draw.circle(screen,(particule.color),particule.pos,radius)
+        pygame.draw.circle(screen,(particule.color),particule.pos,particule.radius)
     
     ####
 
