@@ -9,7 +9,7 @@ import math
 pygame.init()
 frames = 60
 dt = 1/frames
-gravity = (0,9.81)
+gravity = (0,981)
 particleList = []
 
 
@@ -17,7 +17,8 @@ particleList = []
 #rqjouter regex pr check init
 radius = 20
 class particle:
-    def __init__(self,initPos,charge,initSpeed,color = (255, 80, 80)):
+    def __init__(self,initPos,charge,initSpeed,static=False,color = (255, 80, 80)):
+        self.static = static
         self.initPos = initPos
         self.lastPos = substraction(initPos,initSpeed)
         self.charge = charge
@@ -38,10 +39,15 @@ class particle:
     def propCacheReturn(self):
         return self.accVector
     def updatePosition(self):
-        self.speedVector = substraction(self.pos,self.lastPos)
-        self.lastPos = self.pos
-        self.pos = addition(addition(self.pos,self.speedVector),scaling(self.accVector,dt*dt))
-        self.accVector = (0,0)
+        if not(self.static):
+            self.speedVector = substraction(self.pos,self.lastPos)
+            self.lastPos = self.pos
+            self.pos = addition(addition(self.pos,self.speedVector),scaling(self.accVector,dt*dt))
+            self.accVector = (0,0)
+        else:
+            self.pos = self.lastPos
+    def setCharge(self,newCharge):
+        self.charge = newCharge
         
 
 
@@ -69,9 +75,11 @@ def forceEffect():
             disty = (other.pos[1]-particle.pos[1])
             dist = math.sqrt((distx**2)+(disty**2))
             propVector = normalise((distx,disty))
-            propVector = (other.returnCharge()*particle.returnCharge()*propVector[0]/(dist**2),other.returnCharge()*particle.returnCharge()*propVector[1]/(dist**2))
-            particle.propCacheAdd(propVector)
-            other.propCacheAdd((-propVector[0],-propVector[1]))
+            propVector = (other.returnCharge()*particle.returnCharge()*propVector[0]/(dist),other.returnCharge()*particle.returnCharge()*propVector[1]/(dist))
+            #particle.propCacheAdd(propVector)
+            #other.propCacheAdd((-propVector[0],-propVector[1]))
+            other.propCacheAdd(propVector)
+            particle.propCacheAdd((-propVector[0],-propVector[1]))
 
 def gravityEffect():
     for particle in particleList:
@@ -86,12 +94,7 @@ def constraintEffect():
         elif particle.pos[1]+radius > 900:
             particle.move((particle.pos[0],900-radius))
         elif particle.pos[1]-radius < 0:
-            particle.move((particle.pos[0],0+radius))
-
-                    
-
-
-
+            particle.move((particle.pos[0],radius))
 
 
 
@@ -101,17 +104,17 @@ clock = pygame.time.Clock()
 manager = pygame_gui.UIManager((1000, 900))
 
 ####### #     BOUTONS
-random_Bouton = UIButton(
+particleAdd = UIButton(
 	relative_rect=pygame.Rect(900, 000, 100, 30),
-	text='Random\nrotation',
+	text='add particle',
 	manager=manager
 )
 
 
 ######### SLIDERS
-sliderMaxD = UIHorizontalSlider(
+sliderCharge = UIHorizontalSlider(
     pygame.Rect((750,
-    30),(240, 25)), 400, (2, 1000),
+    30),(240, 25)), 400, (2, 70000),
     manager = manager
 )
 
@@ -124,10 +127,7 @@ displayOfRot = UILabel(
 	    manager=manager
     )
 
-for i in range(5):
-    particule = particle((300+2*i,300-i),70,(0,0))
-for i in range(5):
-    particule = particle((400+2*i,300-i),-70,(0,0))
+statParticle = particle((400,450),400,(0,0),True)
 #run
 while True:
     time_delta = clock.tick(frames)
@@ -138,13 +138,11 @@ while True:
         if event.type == pygame.QUIT:
             sys.exit()
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
-            if event.ui_element == random_Bouton:
-                if randomRotVar:randomRotVar = False
-                else:randomRotVar = True
+            if event.ui_element == particleAdd:
+                particle((300,300),-70,(3,0))
         if event.type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
-            if event.ui_element == sliderMaxD:
-                maxDiameterVar = event.value
-                tres = True
+            if event.ui_element == sliderCharge:
+                statParticle.setCharge(event.value)
         manager.process_events(event)
     manager.update(time_delta/1)
 
