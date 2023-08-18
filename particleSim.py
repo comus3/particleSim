@@ -10,14 +10,15 @@ import colorsys
 import math
 pygame.init()
 
-simSubsteps = 2
+simSubsteps = 8
 radius = 25
 frames = 30
 dt = 1/frames
 timeStep = dt/simSubsteps
-gravity = (0,98.1)
+gravity = (0,9.81)
 particleList = []
 gravitationalMode = True
+forceMode = True
 colliderSubSteps = 8
 xLength = 1000
 yLength = 900
@@ -28,7 +29,7 @@ global nmbreParticules,displayOfRot
 #clase particules
 #rqjouter regex pr check init
 class particle:
-    def __init__(self,initPos,charge,initSpeed,static=False,color = (255, 80, 80),colorHueSpeed = 200,radiusOwn = radius):
+    def __init__(self,initPos,charge,initSpeed,static=False,color = (255, 80, 80),colorHueSpeed = 200,radiusOwn = radius,weight = 0.1):
         self.static = static
         self.initPos = initPos
         self.lastPos = substraction(initPos,initSpeed)
@@ -41,6 +42,7 @@ class particle:
         self.color = color
         self.colorStep = 0
         self.colorHueSpeed = colorHueSpeed
+        self.weight = weight
     def returnPos(self):
         return (self.initPosX,self.initPosY)
     def returnCharge(self):
@@ -48,7 +50,7 @@ class particle:
     def move(self,newPos):
         self.pos = (newPos[0],newPos[1])
     def propCacheAdd(self,vector):
-        self.accVector = addition(self.accVector,vector)
+        self.accVector = addition(self.accVector,scaling(vector,self.weight))
     def propCacheReturn(self):
         return self.accVector
     def updatePosition(self,dt):
@@ -238,10 +240,10 @@ sliderCharge = UIHorizontalSlider(
 #     )
 # Thread(target=refreshLabel).start()
 
-statParticle = particle((400,450),400,(0,0),True,(30,0,210),1,25)
-#statParticle2 = particle((600,450),400,(0,0),True,(30,0,210),25)
+statParticle = particle((400,450),400,(0,0),True,(30,0,210),1)
+#statParticle2 = particle((600,450),400,(0,0),True,(30,0,210))
 #run
-
+time = 0
 while True:
     time_delta = clock.tick(frames)
     ######################    partie bouttons(réactions)
@@ -260,22 +262,21 @@ while True:
     manager.update(time_delta/1)
 
        ######################    partie dessins et update des vars
-    forceEffect()
-    #gravityEffect()
-    
+    if forceMode:forceEffect()
+    if gravitationalMode:gravityEffect()
     for gazou in range(simSubsteps):
         collider()
         for particule in particleList:
             particule.updatePosition(timeStep)
-    
+    time = time + dt
     #bck grnd
-    #pygame.draw.rect(screen, (125, 123, 15), pygame.Rect(0, 0, xLength, yLength))
+    pygame.draw.rect(screen, (125, 123, 15), pygame.Rect(0, 0, xLength, yLength))
     #affichage
     ####
     #particles
     for particule in particleList:
         pygame.draw.circle(screen,(particule.color),particule.pos,particule.radius)
-        particule.colorUp()
+        #particule.colorUp()
     
     ####
 
