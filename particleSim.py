@@ -29,7 +29,7 @@ global nmbreParticules,displayOfRot
 #clase particules
 #rqjouter regex pr check init
 class particle:
-    def __init__(self,initPos,charge,initSpeed,static=False,color = (255, 80, 80),colorHueSpeed = 200,radiusOwn = radius,weight = 0.1):
+    def __init__(self,initPos,charge,initSpeed=[0,0],static=False,color = (255, 80, 80),colorHueSpeed = 1000,radiusOwn = radius,weight = 0.01):
         self.static = static
         self.initPos = initPos
         self.lastPos = substraction(initPos,initSpeed)
@@ -37,20 +37,20 @@ class particle:
         self.radius = radiusOwn
         self.pos = initPos
         self.initSpeed = initSpeed
-        self.accVector = (0,0)
+        self.accVector = [0,0]
         particleList.append(self)
         self.color = color
         self.colorStep = 0
         self.colorHueSpeed = colorHueSpeed
         self.weight = weight
     def returnPos(self):
-        return (self.initPosX,self.initPosY)
+        return [self.initPosX,self.initPosY]
     def returnCharge(self):
         return self.charge
     def move(self,newPos):
-        self.pos = (newPos[0],newPos[1])
+        self.pos[0],self.pos[1] = newPos[0],newPos[1]
     def propCacheAdd(self,vector):
-        self.accVector = addition(self.accVector,scaling(vector,1/self.weight))
+        self.accVector[0],self.accVector[1] = addition(self.accVector,scaling(vector,1/self.weight))
     def propCacheReturn(self):
         return self.accVector
     def updatePosition(self,dt):
@@ -58,13 +58,13 @@ class particle:
             self.speedVector = substraction(self.pos,self.lastPos)
             self.lastPos = self.pos
             self.pos = addition(addition(self.pos,self.speedVector),scaling(self.accVector,dt*dt))
-            self.accVector = (0,0)
+            self.accVector[0],self.accVector[1] = 0,0
         else:
-            self.pos = self.lastPos
+            self.pos = self.initPos.copy()
     def setCharge(self,newCharge):
         self.charge = newCharge
     def resetAcc(self):
-        self.accVector = (0,0)
+        self.accVector[0],self.accVector[1] = 0,0
     def colorUp(self):
         num_steps = self.colorHueSpeed
         hue = self.colorStep
@@ -93,15 +93,15 @@ class particle:
 
 def normalise(vector):
     if vector[0] == vector[1] == 0:
-        return (0,0)
+        return [0,0]
     lenght = math.sqrt((vector[0]**2)+(vector[1]**2))
-    return (vector[0]/lenght,vector[1]/lenght)
+    return [vector[0]/lenght,vector[1]/lenght]
 def substraction(vector1,vector2):
-    return (vector1[0]-vector2[0],vector1[1]-vector2[1])
+    return [vector1[0]-vector2[0],vector1[1]-vector2[1]]
 def addition(vector1,vector2):
-    return (vector1[0]+vector2[0],vector1[1]+vector2[1])
+    return [vector1[0]+vector2[0],vector1[1]+vector2[1]]
 def scaling(vector,scalar):
-    return (vector[0]*scalar,vector[1]*scalar)
+    return [vector[0]*scalar,vector[1]*scalar]
 
 # def organise():
 #     grid ={}
@@ -228,7 +228,7 @@ particleAdd = UIButton(
 ######### SLIDERS
 sliderCharge = UIHorizontalSlider(
     pygame.Rect((750,
-    30),(240, 25)), 400, (0, 130000),
+    30),(240, 25)), 400, (0, 96000),
     manager = manager
 )
 
@@ -240,7 +240,7 @@ sliderCharge = UIHorizontalSlider(
 #     )
 # Thread(target=refreshLabel).start()
 
-statParticle = particle((400,450),400,(0,0),True,(30,0,210),1)
+statParticle = particle([400,450],400,[0,0],True,(30,0,210),1)
 #statParticle2 = particle((600,450),400,(0,0),True,(30,0,210))
 #run
 time = 0
@@ -253,7 +253,7 @@ while True:
             sys.exit()
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == particleAdd:
-                particle((400,200),7,(1,0))
+                particle([400,200],7,[2,0.5])
         if event.type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
             if event.ui_element == sliderCharge:
                 statParticle.setCharge(event.value)
