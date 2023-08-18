@@ -128,14 +128,14 @@ def checkCollision(objectA,objectB):
         objectB.move((objectB.pos[0]-correctionVect[0],objectB.pos[1]-correctionVect[1]))
 
 def collider():
+    grid = organise()
     for lurkin in range(colliderSubSteps):
-        grid = organise()
         for i in range(gridSpacingX):
-            if i == 0 or i == gridSpacingX-1:
-                continue
+            #if i == 0 or i == gridSpacingX-1:
+            #    continue
             for j in range(gridSpacingY):
-                if j == 0 or j == gridSpacingY-1:
-                    continue
+                #if j == 0 or j == gridSpacingY-1:
+                #    continue
                 if grid[(i,j)] != []:
                     for particle in grid[(i,j)]:
                         for other in grid[(i,j)]:
@@ -146,6 +146,8 @@ def collider():
                             if index in grid:
                                 for other in grid[index]:
                                     checkCollision(particle,other)
+        grid = organise()
+    constraintEffect(grid)
                         
         
 def forceEffect():
@@ -172,16 +174,23 @@ def gravityEffect():
     for particle in particleList:
         particle.propCacheAdd(gravity)
                 
-def constraintEffect():
-    for particle in particleList:
-        if particle.pos[0]+particle.radius > xLength:
-            particle.move((xLength-particle.radius,particle.pos[1]))
-        if particle.pos[0]-particle.radius < 0:
-            particle.move((0+particle.radius,particle.pos[1]))
-        if particle.pos[1]+particle.radius > yLength:
-            particle.move((particle.pos[0],yLength-particle.radius))
-        if particle.pos[1]-particle.radius < 0:
-            particle.move((particle.pos[0],particle.radius))
+def constraintEffect(grid):
+    topBottom = [(x,y) for x in range(gridSpacingX) for y in [0,gridSpacingY-1]]
+    leftRight = [(x,y) for x in [0,gridSpacingX-1] for y in range(gridSpacingY)]
+    for indice in leftRight:
+        if grid[indice]!=[]:
+            for particle in grid[indice]:
+                if particle.pos[0]+particle.radius > xLength:
+                    particle.move((xLength-particle.radius,particle.pos[1]))
+                if particle.pos[0]-particle.radius < 0:
+                    particle.move((0+particle.radius,particle.pos[1]))
+    for indice in topBottom:
+        if grid[indice]!=[]:
+            for particle in grid[indice]:
+                if particle.pos[1]+particle.radius > yLength:
+                    particle.move((particle.pos[0],yLength-particle.radius))
+                if particle.pos[1]-particle.radius < 0:
+                    particle.move((particle.pos[0],particle.radius))
 
 
 
@@ -214,6 +223,7 @@ sliderCharge = UIHorizontalSlider(
 # Thread(target=refreshLabel).start()
 
 statParticle = particle((400,450),400,(0,0),True,(30,0,210),25)
+statParticle2 = particle((600,450),400,(0,0),True,(30,0,210),25)
 #run
 
 while True:
@@ -229,13 +239,14 @@ while True:
         if event.type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
             if event.ui_element == sliderCharge:
                 statParticle.setCharge(event.value)
+                statParticle2.setCharge(event.value)
         manager.process_events(event)
     manager.update(time_delta/1)
 
        ######################    partie dessins et update des vars
     forceEffect()
     gravityEffect()
-    constraintEffect()
+    
     for gazou in range(simSubsteps):
         collider()
         for particule in particleList:
