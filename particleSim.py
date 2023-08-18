@@ -6,6 +6,7 @@ import pygame_gui
 from pygame_gui.elements import UIButton, UITextEntryLine, UILabel, UIHorizontalSlider
 from threading import Thread
 import sys
+import colorsys
 import math
 pygame.init()
 
@@ -27,7 +28,7 @@ global nmbreParticules,displayOfRot
 #clase particules
 #rqjouter regex pr check init
 class particle:
-    def __init__(self,initPos,charge,initSpeed,static=False,color = (255, 80, 80),radiusOwn = radius):
+    def __init__(self,initPos,charge,initSpeed,static=False,color = (255, 80, 80),colorHueSpeed = 200,radiusOwn = radius):
         self.static = static
         self.initPos = initPos
         self.lastPos = substraction(initPos,initSpeed)
@@ -38,6 +39,8 @@ class particle:
         self.accVector = (0,0)
         particleList.append(self)
         self.color = color
+        self.colorStep = 0
+        self.colorHueSpeed = colorHueSpeed
     def returnPos(self):
         return (self.initPosX,self.initPosY)
     def returnCharge(self):
@@ -60,6 +63,19 @@ class particle:
         self.charge = newCharge
     def resetAcc(self):
         self.accVector = (0,0)
+    def colorUp(self):
+        num_steps = self.colorHueSpeed
+        hue = self.colorStep
+        step_val = 1.0 / num_steps
+        rgb = colorsys.hsv_to_rgb(hue, 1, 1)
+        hue += step_val
+        hue %= 1.0 # cap hue at 1.0
+        r = round(rgb[0] * 255)
+        g = round(rgb[1] * 255)
+        b = round(rgb[2] * 255)
+        rgb_ints = (r, g, b)
+        self.colorStep = hue
+        self.color = rgb_ints
 
 
 #fonctions
@@ -222,8 +238,8 @@ sliderCharge = UIHorizontalSlider(
 #     )
 # Thread(target=refreshLabel).start()
 
-statParticle = particle((400,450),400,(0,0),True,(30,0,210),25)
-statParticle2 = particle((600,450),400,(0,0),True,(30,0,210),25)
+statParticle = particle((400,450),400,(0,0),True,(30,0,210),1,25)
+#statParticle2 = particle((600,450),400,(0,0),True,(30,0,210),25)
 #run
 
 while True:
@@ -239,13 +255,13 @@ while True:
         if event.type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
             if event.ui_element == sliderCharge:
                 statParticle.setCharge(event.value)
-                statParticle2.setCharge(event.value)
+                #statParticle2.setCharge(event.value)
         manager.process_events(event)
     manager.update(time_delta/1)
 
        ######################    partie dessins et update des vars
     forceEffect()
-    gravityEffect()
+    #gravityEffect()
     
     for gazou in range(simSubsteps):
         collider()
@@ -253,12 +269,13 @@ while True:
             particule.updatePosition(timeStep)
     
     #bck grnd
-    pygame.draw.rect(screen, (125, 123, 15), pygame.Rect(0, 0, xLength, yLength))
+    #pygame.draw.rect(screen, (125, 123, 15), pygame.Rect(0, 0, xLength, yLength))
     #affichage
     ####
     #particles
     for particule in particleList:
         pygame.draw.circle(screen,(particule.color),particule.pos,particule.radius)
+        particule.colorUp()
     
     ####
 
