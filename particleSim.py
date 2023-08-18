@@ -10,12 +10,12 @@ import colorsys
 import math
 pygame.init()
 
-simSubsteps = 8
+simSubsteps = 10
 radius = 25
-frames = 30
+frames = 60
 dt = 1/frames
 timeStep = dt/simSubsteps
-gravity = (0,9.81)
+gravity = (0,981)
 particleList = []
 gravitationalMode = True
 forceMode = True
@@ -50,7 +50,7 @@ class particle:
     def move(self,newPos):
         self.pos = (newPos[0],newPos[1])
     def propCacheAdd(self,vector):
-        self.accVector = addition(self.accVector,scaling(vector,self.weight))
+        self.accVector = addition(self.accVector,scaling(vector,1/self.weight))
     def propCacheReturn(self):
         return self.accVector
     def updatePosition(self,dt):
@@ -228,7 +228,7 @@ particleAdd = UIButton(
 ######### SLIDERS
 sliderCharge = UIHorizontalSlider(
     pygame.Rect((750,
-    30),(240, 25)), 400, (2, 130000),
+    30),(240, 25)), 400, (0, 130000),
     manager = manager
 )
 
