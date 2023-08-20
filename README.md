@@ -35,7 +35,9 @@
 
 [![Product Name Screen Shot][product-screenshot]](https://example.com)
 
-My objectives for this project is to build a particle simulator that is deterministic fluid and fun to play zith
+My objectives for this project is to build a particle simulator that is deterministic fluid and fun to play with. To simulate newton's laws i used verlet equation.i implemeted it directly in the particle's methods.
+collisions were hell to fix but they are currently working for the restraint and particle to particle collision is working but not fully optimised.
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -98,6 +100,9 @@ not much for now
 - [ ] add fun buttons and controls
 - [ ] fluidify the whole thing
 - [X] collisions
+- [ ] make this library-able
+- [ ] multi threading
+- [ ] maybe find something else to display stuff
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
