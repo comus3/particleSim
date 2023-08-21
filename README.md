@@ -43,7 +43,33 @@ collisions were hell to fix but they are currently working for the restraint and
 
 
 
+<!-- IN DEPTH EXPLANATION -->
 
+Le programme est conçu pour simuler la dynamique de particules en utilisant une mise en œuvre de l'équation de Verlet, une méthode numérique populaire pour résoudre les équations du mouvement. Cette méthode se distingue par sa stabilité et son aptitude à gérer les simulations de particules en interaction.
+
+Lors de l'exécution du programme, les particules sont créées et initialement positionnées dans l'espace. Chaque particule possède des propriétés telles que sa position, sa vitesse, sa masse et sa charge électrique. Les particules peuvent être définies comme statiques ou mobiles, ce qui détermine si elles sont influencées par les forces externes.
+
+La simulation est organisée en boucle, où chaque itération de la boucle représente un pas dans le temps. Voici comment le programme fonctionne :
+
+1. **Initialisation :** Au démarrage, les paramètres de la simulation sont configurés. Cela inclut des variables telles que la durée entre les images (time_delta), le nombre de frames par seconde (frames), le rayon des particules, et d'autres valeurs nécessaires pour le calcul de la dynamique.
+
+2. **Boucle de Simulation :** Le cœur du programme est la boucle de simulation. À chaque itération de la boucle, les étapes suivantes sont effectuées :
+
+   a. **Gestion des Événements :** Le programme vérifie les événements en attente, tels que les interactions utilisateur avec des boutons ou des curseurs. Ces interactions peuvent ajouter de nouvelles particules ou ajuster les paramètres.
+
+   b. **Calcul des Forces :** Différents effets et forces peuvent être appliqués aux particules. Ces forces peuvent inclure la gravité, des contraintes pour maintenir les particules dans certaines zones, et d'autres interactions.
+
+   c. **Mise à Jour des Positions :** Chaque particule calcule sa nouvelle position en utilisant l'équation de Verlet, qui repose sur les positions actuelles et précédentes ainsi que les forces appliquées. Les particules mobiles sont déplacées en conséquence.
+
+   d. **Détection de Collision :** La détection de collision est effectuée à l'aide d'une approche basée sur une grille. Les particules sont organisées dans une structure de grille pour accélérer la détection des collisions. Les particules qui se chevauchent sont corrigées en déplaçant leurs positions et en ajustant les vitesses en réponse à la collision.
+
+   e. **Dessin :** Les positions mises à jour sont utilisées pour dessiner les particules sur l'écran, créant ainsi une représentation visuelle de la simulation.
+
+   f. **Affichage :** L'écran est rafraîchi pour afficher les particules et les changements liés aux événements.
+
+3. **Gestion des Paramètres :** Le programme offre des moyens d'interagir avec la simulation en ajustant les paramètres tels que la charge des particules, les effets appliqués, etc. Ces interactions peuvent être réalisées à l'aide de boutons et de curseurs, et elles peuvent influencer le comportement de la simulation.
+
+En résumé, le programme simule la dynamique de particules en utilisant l'équation de Verlet pour mettre à jour les positions en fonction des forces appliquées. La détection de collision est gérée à travers une méthode basée sur une grille. Cette approche permet de visualiser les interactions entre les particules et de reproduire divers comportements de particules dans un environnement interactif.
 
 <!-- GETTING STARTED -->
 ## Getting Started
