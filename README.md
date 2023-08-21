@@ -17,6 +17,7 @@
 <details>
   <summary>Table of Contents</summary>
   <ol>
+    <li><a href="IN-DEPTH-EXPLANATION">IN DEPTH EXPLANATION</a></li>
     <li>
       <a href="#about-the-project">About The Project</a>
       <ul>
@@ -44,6 +45,7 @@ collisions were hell to fix but they are currently working for the restraint and
 
 
 <!-- IN DEPTH EXPLANATION -->
+## IN DEPTH EXPLANATION
 
 Le programme est conçu pour simuler la dynamique de particules en utilisant une mise en œuvre de l'équation de Verlet, une méthode numérique populaire pour résoudre les équations du mouvement. Cette méthode se distingue par sa stabilité et son aptitude à gérer les simulations de particules en interaction.
 
