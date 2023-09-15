@@ -10,12 +10,12 @@ import colorsys
 import math
 pygame.init()
 
-simSubsteps = 10
+simSubsteps = 5
 radius = 25
-frames = 60
+frames = 30
 dt = 1/frames
 timeStep = dt/simSubsteps
-gravity = (0,981)
+gravity = (0,0)
 particleList = []
 gravitationalMode = True
 forceMode = True
@@ -59,6 +59,7 @@ class particle:
             self.lastPos = self.pos
             self.pos = addition(addition(self.pos,self.speedVector),scaling(self.accVector,dt*dt))
             self.accVector[0],self.accVector[1] = 0,0
+
         else:
             self.pos = self.initPos.copy()
     def setCharge(self,newCharge):
@@ -166,8 +167,7 @@ def collider():
                                     checkCollision(particle,other)
         grid = organise()
     constraintEffect(grid)
-                        
-        
+                            
 def forceEffect():
     cacheList = particleList.copy()
     for particle in cacheList:
@@ -228,7 +228,7 @@ particleAdd = UIButton(
 ######### SLIDERS
 sliderCharge = UIHorizontalSlider(
     pygame.Rect((750,
-    30),(240, 25)), 400, (0, 96000),
+    30),(240, 25)), 400, (0, 170000),
     manager = manager
 )
 
@@ -253,7 +253,7 @@ while True:
             sys.exit()
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == particleAdd:
-                particle([400,200],7,[2,0.5])
+                particle([400,200],7,[5.2,0])
         if event.type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
             if event.ui_element == sliderCharge:
                 statParticle.setCharge(event.value)
