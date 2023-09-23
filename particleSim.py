@@ -270,7 +270,7 @@ while True:
             particule.updatePosition(timeStep)
     time = time + dt
     #bck grnd
-    pygame.draw.rect(screen, (125, 123, 15), pygame.Rect(0, 0, xLength, yLength))
+    pygame.draw.rect(screen, (15, 100, 225), pygame.Rect(0, 0, xLength, yLength))
     #affichage
     ####
     #particles
