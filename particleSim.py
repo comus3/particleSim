@@ -210,88 +210,81 @@ def constraintEffect(grid):
                 if particle.pos[1]-particle.radius < 0:
                     particle.move((particle.pos[0],particle.radius))
 
+if __name__ == "__main__":
+
+    #init
+    screen = pygame.display.set_mode((xLength,yLength))
+    clock = pygame.time.Clock()
+    manager = pygame_gui.UIManager((xLength, yLength))
+
+    ####### #     BOUTONS
+    particleAdd = UIButton(
+        relative_rect=pygame.Rect(900, 000, 100, 30),
+        text='add particle',
+        manager=manager
+    )
 
 
-#init
-screen = pygame.display.set_mode((xLength,yLength))
-clock = pygame.time.Clock()
-manager = pygame_gui.UIManager((xLength, yLength))
+    ######### SLIDERS
+    sliderCharge = UIHorizontalSlider(
+        pygame.Rect((750,
+        30),(240, 25)), 400, (0, 130000),
+        manager = manager
+    )
 
-####### #     BOUTONS
-particleAdd = UIButton(
-	relative_rect=pygame.Rect(900, 000, 100, 30),
-	text='add particle',
-	manager=manager
-)
+    ########## infos
+    # displayOfRot = UILabel(
+    # 	    relative_rect=pygame.Rect(750, 620, 250, 100),
+    # 	    text="0 particules",
+    # 	    manager=manager
+    #     )
+    # Thread(target=refreshLabel).start()
 
+    statParticle = particle((400,450),400,(0,0),True,(30,0,210),1)
+    #statParticle2 = particle((600,450),400,(0,0),True,(30,0,210))
+    #run
+    time = 0
+    while True:
+        time_delta = clock.tick(frames)
+        ######################    partie bouttons(réactions)
 
-######### SLIDERS
-sliderCharge = UIHorizontalSlider(
-    pygame.Rect((750,
-    30),(240, 25)), 400, (0, 130000),
-    manager = manager
-)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
+            if event.type == pygame_gui.UI_BUTTON_PRESSED:
+                if event.ui_element == particleAdd:
+                    particle((400,200),7,(1,0))
+            if event.type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
+                if event.ui_element == sliderCharge:
+                    statParticle.setCharge(event.value)
+                    #statParticle2.setCharge(event.value)
+            manager.process_events(event)
+        manager.update(time_delta/1)
 
-########## infos
-# displayOfRot = UILabel(
-# 	    relative_rect=pygame.Rect(750, 620, 250, 100),
-# 	    text="0 particules",
-# 	    manager=manager
-#     )
-# Thread(target=refreshLabel).start()
-
-statParticle = particle((400,450),400,(0,0),True,(30,0,210),1)
-#statParticle2 = particle((600,450),400,(0,0),True,(30,0,210))
-#run
-time = 0
-while True:
-    time_delta = clock.tick(frames)
-    ######################    partie bouttons(réactions)
-
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            sys.exit()
-        if event.type == pygame_gui.UI_BUTTON_PRESSED:
-            if event.ui_element == particleAdd:
-                particle((400,200),7,(1,0))
-        if event.type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
-            if event.ui_element == sliderCharge:
-                statParticle.setCharge(event.value)
-                #statParticle2.setCharge(event.value)
-        manager.process_events(event)
-    manager.update(time_delta/1)
-
-       ######################    partie dessins et update des vars
-    if forceMode:forceEffect()
-    if gravitationalMode:gravityEffect()
-    for gazou in range(simSubsteps):
-        collider()
+        ######################    partie dessins et update des vars
+        if forceMode:forceEffect()
+        if gravitationalMode:gravityEffect()
+        for gazou in range(simSubsteps):
+            collider()
+            for particule in particleList:
+                particule.updatePosition(timeStep)
+        time = time + dt
+        #bck grnd
+        pygame.draw.rect(screen, (125, 123, 15), pygame.Rect(0, 0, xLength, yLength))
+        #affichage
+        ####
+        #particles
         for particule in particleList:
-            particule.updatePosition(timeStep)
-    time = time + dt
-    #bck grnd
-    pygame.draw.rect(screen, (125, 123, 15), pygame.Rect(0, 0, xLength, yLength))
-    #affichage
-    ####
-    #particles
-    for particule in particleList:
-        pygame.draw.circle(screen,(particule.color),particule.pos,particule.radius)
-        #particule.colorUp()
-    
-    ####
+            pygame.draw.circle(screen,(particule.color),particule.pos,particule.radius)
+            #particule.colorUp()
+        
+        ####
 
-    ###############################  affichage 
-    manager.draw_ui(screen)
-    pygame.display.flip()
+        ###############################  affichage 
+        manager.draw_ui(screen)
+        pygame.display.flip()
 
 
 
 
 
-
-
-/////////	//////////	///	///
-//		//	//	// /   / //
-//		//	//	//   /   //
-//		//	//	//	 //
-/////////	//////////	//	 //
